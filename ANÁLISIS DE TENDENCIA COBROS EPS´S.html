@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analítico - Valor por EPS</title>
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carga de Chart.js (para las gráficas) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- NUEVO: Plugin para etiquetas en las gráficas (líneas amarradas) -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <!-- Carga de Google Fonts (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilo personalizado para la fuente Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Estilo para los tooltips de Chart.js */
+        .chartjs-tooltip {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Ocultar etiquetas de datalabels demasiado pequeñas */
+        .chartjs-datalabel-hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+
+        <!-- Título del Dashboard -->
+        <header class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">Dashboard de Análisis de Valor por EPS</h1>
+            <p class="text-lg text-gray-600">Reporte Ejecutivo (2021-2025)</p>
+        </header>
+
+        <!-- Sección de KPIs (Indicadores Clave) - DATOS CORREGIDOS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6">
+            
+            <!-- KPI 1: Valor Total General -->
+            <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-600">
+                <h2 class="text-sm font-semibold text-gray-500 uppercase">Valor Total General</h2>
+                <p class="text-3xl font-bold text-gray-900 mt-1">197.3 M</p>
+                <p class="text-xs text-gray-500 mt-1">Suma de valor 2021-2025</p>
+            </div>
+
+            <!-- KPI 2: EPS Principal -->
+            <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-600">
+                <h2 class="text-sm font-semibold text-gray-500 uppercase">EPS Principal (Acumulado)</h2>
+                <p class="text-3xl font-bold text-gray-900 mt-1">Salud Total E.P.S.</p>
+                <p class="text-xs text-gray-500 mt-1">43.8 M (Valor Acumulado)</p>
+            </div>
+
+            <!-- KPI 3: Año Pico -->
+            <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-600">
+                <h2 class="text-sm font-semibold text-gray-500 uppercase">Año Pico de Valor</h2>
+                <p class="text-3xl font-bold text-gray-900 mt-1">2023</p>
+                <p class="text-xs text-gray-500 mt-1">54.5 M (Valor Anual)</p>
+            </div>
+
+            <!-- KPI 4: Entidad Atípica (TRANSAMBIENTAL) -->
+            <div class="bg-white p-6 rounded-lg shadow-md border-l-4 border-yellow-500">
+                <h2 class="text-sm font-semibold text-gray-500 uppercase">Valor Singular</h2>
+                <p class="text-3xl font-bold text-gray-900 mt-1">Transambiental</p>
+                <p class="text-xs text-gray-500 mt-1">38.6 M (Solo en 2021)</p>
+            </div>
+        </div>
+
+        <!-- NUEVO: Sección de Filtros -->
+        <div class="mb-6 bg-white p-4 rounded-lg shadow-md">
+            <label for="yearFilter" class="block text-sm font-medium text-gray-700">Filtrar por Año:</label>
+            <select id="yearFilter" class="mt-1 block w-full md:w-1/4 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                <option selected>Todos los Años</option>
+                <option>2021</option>
+                <option>2022</option>
+                <option>2023</option>
+                <option>2024</option>
+                <option>2025</option>
+            </select>
+        </div>
+
+        <!-- Sección de Gráficas Principales -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+            <!-- Gráfica 1: Evolución del Valor Total (Gráfico de Líneas) - ESTÁTICA -->
+            <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Evolución Anual del Valor Total</h3>
+                <div class="h-80">
+                    <canvas id="lineChart"></canvas>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <h4 class="font-semibold text-gray-700">Interpretación del Analista:</h4>
+                    <p class="text-sm text-gray-600 mt-1">
+                        El valor total muestra una volatilidad significativa. El pico extremo en 2021 se debe en su totalidad al valor singular de TRANSAMBIENTAL SAS (38.6M). Excluyendo ese evento, se observa una tendencia de crecimiento notable, alcanzando un máximo operativo en 2023 (54.5M). Los años 2024 y 2025 muestran una estabilización robusta por encima de los 40M.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Gráfica 2: Composición del Valor Total (Gráfico de Dona) - DINÁMICA -->
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Composición del Valor</h3>
+                <div class="h-80 relative">
+                    <canvas id="doughnutChart"></canvas>
+                </div>
+                <div class="mt-4 pt-4 border-t border-gray-200">
+                    <h4 class="font-semibold text-gray-700">Interpretación del Analista:</h4>
+                    <p class="text-sm text-gray-600 mt-1">
+                        El gráfico muestra la participación de cada entidad sobre el valor total del período seleccionado. En el acumulado ("Todos los Años"), las 5 entidades principales (Salud Total, Sanitas, Transambiental, Mutual Ser y Famisanar) representan más del 85% del valor total. Use el filtro para ver la composición de un año específico.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- NUEVA Gráfica de Barras Horizontal (Ranking) - DINÁMICA -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Ranking de Entidades por Valor</h3>
+            <div class="h-[600px] relative">
+                <canvas id="rankingBarChart"></canvas>
+            </div>
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <h4 class="font-semibold text-gray-700">Interpretación del Analista:</h4>
+                <p class="text-sm text-gray-600 mt-1">
+                    Este ranking muestra el valor aportado por cada entidad, ordenado de mayor a menor, para el período seleccionado.
+                    <br>• En "Todos los Años", <strong>SALUD TOTAL E.P.S.</strong> lidera el acumulado con 43.8M, seguida de cerca por el valor singular de <strong>TRANSAMBIENTAL SAS</strong> (38.6M).
+                    <br>• <strong>ARL SURA</strong> muestra un valor acumulado negativo (-4.2M) debido a un fuerte ajuste en 2025.
+                    <br>• Filtre por año para ver el ranking específico de ese período. Por ejemplo, en <strong>2023</strong>, <strong>SANITAS E.P.S</strong> fue el líder indiscutible (17.0M).
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- REGISTRO DE PLUGINS ---
+        // Registrar el plugin de etiquetas de datos
+        Chart.register(ChartDataLabels);
+
+        // --- VARIABLES GLOBALES DE DATOS Y GRÁFICAS ---
+        let lineChart, doughnutChart, rankingBarChart;
+
+        // --- BASE DE DATOS MAESTRA (Según la imagen) ---
+        const fullData = {
+            years: ['2021', '2022', '2023', '2024', '2025'],
+            totalsByYear: [38623261.06, 18194865.00, 54481734.00, 45602739.00, 40388357.00],
+            entities: [
+                { name: 'SALUD TOTAL E.P.S.', values: [0, 4882465, 8667958, 16135741, 14144951], total: 43831115 },
+                { name: 'SANITAS E.P.S', values: [0, 2310456, 16952990, 8188650, 7165577], total: 34617673 },
+                { name: 'TRANSAMBIENTAL SAS', values: [38623261.06, 0, 0, 0, 0], total: 38623261.06 },
+                { name: 'EPS MUTUAL SER', values: [0, 6782337, 9521414, 5476679, 6484188], total: 28264618 },
+                { name: 'FAMISANAR E.P.S', values: [0, 1328674, 11614140, 7284990, 6364507], total: 26592311 },
+                { name: 'SURA E.P.S.', values: [0, 1810983, 3047344, 2991428, 2658540], total: 10508295 },
+                { name: 'COOSALUD ESS EPS -S', values: [0, 710325, 3407896, 966867, 3661949], total: 8747037 },
+                { name: 'NUEVA E.P.S', values: [0, 0, 999324, 2514623, 2416853], total: 5930800 },
+                { name: 'EPS-S CAJACOPI', values: [0, 0, 270668, 86667, 2229713], total: 2587048 },
+                { name: 'CLINICA DE BLAS DE LEZO', values: [0, 0, 0, 857326, 0], total: 857326 },
+                { name: 'FOSYGA', values: [0, 0, 0, 563334, 0], total: 563334 },
+                { name: 'ARL SURA', values: [0, 0, 0, 536434, -4737921], total: -4201487 }, // Valor de 2024 y 2025 sumados
+                { name: 'COOMEVA E.P.S', values: [0, 327939, 0, 0, 0], total: 327939 },
+                { name: '(en blanco)', values: [0, 41686, 0, 0, 0], total: 41686 }
+            ]
+        };
+
+        // --- FUNCIONES DE FORMATO ---
+        const formatAsCurrency = (value) => {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency', currency: 'COP', minimumFractionDigits: 0, maximumFractionDigits: 0
+            }).format(value);
+        };
+        const formatShort = (value) => {
+            if (Math.abs(value) >= 1.0e+6) { return (value / 1.0e+6).toFixed(1) + "M"; }
+            if (Math.abs(value) >= 1.0e+3) { return (value / 1.0e+3).toFixed(1) + "K"; }
+            return value;
+        };
+        
+        // --- OPCIONES GLOBALES DE GRÁFICAS ---
+        const commonTooltipOptions = {
+            enabled: true, mode: 'index', intersect: false,
+            bodyFont: { family: 'Inter' }, titleFont: { family: 'Inter' },
+            callbacks: {
+                label: (context) => `${context.dataset.label || ''}: ${formatAsCurrency(context.parsed.y || context.parsed.x)}`
+            }
+        };
+
+        // --- FUNCIÓN DE INICIALIZACIÓN (Se llama al cargar la página) ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar el listener del filtro
+            document.getElementById('yearFilter').addEventListener('change', (e) => updateDashboard(e.target.value));
+            
+            // Renderizar el dashboard por primera vez
+            createLineChart();
+            updateDashboard("Todos los Años");
+        });
+
+        // --- 1. CREAR GRÁFICO DE LÍNEAS (Estático) ---
+        function createLineChart() {
+            const ctxLine = document.getElementById('lineChart').getContext('2d');
+            lineChart = new Chart(ctxLine, {
+                type: 'line',
+                data: {
+                    labels: fullData.years,
+                    datasets: [{
+                        label: 'Suma de Valor Total',
+                        data: fullData.totalsByYear,
+                        fill: true,
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        tension: 0.1,
+                        pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                        pointRadius: 4,
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
+                        tooltip: commonTooltipOptions,
+                        datalabels: { // <-- AÑADIDO: Desactivar explícitamente
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { font: { family: 'Inter' }, callback: (val) => formatShort(val) },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        x: {
+                            ticks: { font: { family: 'Inter' } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- 2. FUNCIÓN PRINCIPAL DE ACTUALIZACIÓN ---
+        function updateDashboard(selectedYear) {
+            const yearIndex = fullData.years.indexOf(selectedYear);
+            
+            // Preparar datos para Dona y Barras
+            let chartData;
+            if (yearIndex === -1) { // "Todos los Años"
+                chartData = fullData.entities.map(e => ({ name: e.name, value: e.total }));
+            } else { // Año específico
+                chartData = fullData.entities.map(e => ({ name: e.name, value: e.values[yearIndex] }));
+            }
+
+            // Filtrar valores 0 o nulos para limpieza
+            const filteredData = chartData.filter(d => d.value !== 0);
+
+            // Actualizar las dos gráficas dinámicas
+            updateDoughnutChart(filteredData);
+            updateRankingBarChart(filteredData);
+        }
+
+        // --- 3. ACTUALIZAR GRÁFICO DE DONA (Dinámico) ---
+        function updateDoughnutChart(data) {
+            if (doughnutChart) {
+                doughnutChart.destroy(); // Destruir gráfica anterior
+            }
+
+            // Agrupar valores pequeños en "Otros"
+            const totalSum = data.reduce((sum, d) => sum + d.value, 0);
+            const threshold = totalSum * 0.02; // Agrupar todo lo < 2%
+            
+            let mainData = data.filter(d => Math.abs(d.value) >= threshold);
+            let othersValue = data.filter(d => Math.abs(d.value) < threshold).reduce((sum, d) => sum + d.value, 0);
+
+            if (othersValue !== 0) {
+                mainData.push({ name: 'Otras Entidades', value: othersValue });
+            }
+            
+            // Ordenar para mejor visualización
+            mainData.sort((a, b) => b.value - a.value);
+
+            const ctxDoughnut = document.getElementById('doughnutChart').getContext('2d');
+            doughnutChart = new Chart(ctxDoughnut, {
+                type: 'doughnut',
+                data: {
+                    labels: mainData.map(d => d.name),
+                    datasets: [{
+                        label: 'Valor',
+                        data: mainData.map(d => d.value),
+                        backgroundColor: [
+                            'rgba(34, 139, 230, 1)', 'rgba(22, 163, 74, 1)', 'rgba(245, 158, 11, 1)',
+                            'rgba(168, 85, 247, 1)', 'rgba(239, 68, 68, 1)', 'rgba(21, 192, 182, 1)',
+                            'rgba(107, 114, 128, 1)', 'rgba(217, 119, 6, 1)', 'rgba(5, 150, 105, 1)'
+                        ],
+                        hoverOffset: 4,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '60%',
+                    plugins: {
+                        legend: { // <-- MODIFICADO: Se activa la leyenda
+                            display: true, 
+                            position: 'bottom',
+                            labels: {
+                                font: { family: 'Inter' }
+                            }
+                        }, 
+                        tooltip: { // <-- MODIFICADO: Tooltip mejorado con %
+                            bodyFont: { family: 'Inter' },
+                            titleFont: { family: 'Inter' },
+                            callbacks: {
+                                label: (context) => {
+                                    const label = context.label || '';
+                                    const value = context.parsed;
+                                    const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1) + '%';
+                                    // Formato: "EPS: $Valor (Porcentaje)"
+                                    return `${label}: ${formatAsCurrency(value)} (${percentage})`;
+                                }
+                            }
+                        },
+                        // SE DESACTIVAN LAS ETIQUETAS EXTERNAS
+                        datalabels: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- 4. ACTUALIZAR GRÁFICO DE BARRAS (Dinámico) ---
+        function updateRankingBarChart(data) {
+            if (rankingBarChart) {
+                rankingBarChart.destroy(); // Destruir gráfica anterior
+            }
+
+            // Ordenar datos de mayor a menor valor
+            data.sort((a, b) => b.value - a.value);
+
+            const ctxRankingBar = document.getElementById('rankingBarChart').getContext('2d');
+            rankingBarChart = new Chart(ctxRankingBar, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        label: 'Valor',
+                        data: data.map(d => d.value),
+                        backgroundColor: (context) => {
+                             // Color negativo para ARL SURA
+                            return context.raw < 0 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(59, 130, 246, 0.8)';
+                        },
+                        borderColor: (context) => {
+                            return context.raw < 0 ? 'rgba(239, 68, 68, 1)' : 'rgba(59, 130, 246, 1)';
+                        },
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // <-- Esto lo hace horizontal
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }, // Sin leyenda, solo hay 1 dataset
+                        tooltip: commonTooltipOptions,
+                        datalabels: { // Etiquetas al final de la barra
+                             anchor: 'end',
+                             align: 'end',
+                             formatter: (value) => formatShort(value),
+                             color: '#333',
+                             font: { family: 'Inter', weight: '600' }
+                        }
+                    },
+                    scales: {
+                        x: { // 'x' ahora es el eje de valor
+                            beginAtZero: true,
+                            ticks: { font: { family: 'Inter' }, callback: (val) => formatShort(val) },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                        },
+                        y: { // 'y' ahora es el eje de categorías (EPS)
+                            ticks: { font: { family: 'Inter', size: 11 } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>
